@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import CallButton from "../components/CallButton";
 
 export default function HomeScreen({
   navigation,
@@ -35,6 +36,7 @@ export default function HomeScreen({
       >
         <Text style={styles.buttonText}>Mis citas</Text>
       </TouchableOpacity>
+      <CallButton />
     </View>
   );
 }
@@ -83,15 +85,15 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   reminderButton: {
-	backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFFFFF",
     marginTop: 5,
     paddingVertical: 18,
     borderRadius: 35,
     alignItems: "center",
   },
   reminderButtonText: {
-	fontSize: 30,
-	paddingHorizontal: 40,
+    fontSize: 30,
+    paddingHorizontal: 40,
     color: "#11a358ff",
     fontWeight: "bold",
   },

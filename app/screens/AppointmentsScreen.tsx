@@ -7,6 +7,7 @@ import {
   SectionList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import CallButton from "../components/CallButton";
 
 type AppointmentDate = {
   day: number;
@@ -164,6 +165,7 @@ export default function AppointmentsScreen() {
           </TouchableOpacity>
         )}
       />
+	  <CallButton />
     </View>
   );
 }
