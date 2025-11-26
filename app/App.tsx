@@ -1,34 +1,21 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { AppointmentsProvider } from "./context/AppointmentsContext";
+import { MedicationsProvider } from "./context/MedicationsContext";
+import AppNavigator from "./navigation/AppNavigator";
+import { StatusBar } from "expo-status-bar";
 
-export default function App() {
+function AppProviders({ children }: { children: React.ReactNode }) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Vida Plena</Text>
-      <Text style={styles.subtitle}>
-        App de Salud para Adultos Mayores.
-      </Text>
-      <StatusBar style="dark" />
-    </View>
+    <MedicationsProvider>
+      <AppointmentsProvider>{children}</AppointmentsProvider>
+    </MedicationsProvider>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  subtitle: {
-    fontSize: 18,
-    textAlign: 'center',
-  },
-});
+export default function App() {
+  return (
+    <AppProviders>
+      <AppNavigator />
+      <StatusBar style="dark" />
+    </AppProviders>
+  );
+}
