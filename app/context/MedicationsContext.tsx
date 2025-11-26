@@ -5,7 +5,7 @@ type Medication = {
   id: string;
   name: string;
   dose: string;
-  frequencyhours: number;
+  frequencyHours: number;
   schedules?: string[];
   durationDays?: number;
   notes?: string;

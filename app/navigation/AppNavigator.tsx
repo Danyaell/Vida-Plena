@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import MedicationsScreen from '../screens/MedicationsScreen';
 import AppointmentsScreen from '../screens/AppointmentsScreen';
+import NewMedicationScreen from '../screens/NewMedicationScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,6 +17,11 @@ export default function AppNavigator() {
         <Stack.Screen
           name="Medications"
           component={MedicationsScreen}
+          options={{ title: '' }}
+        />
+        <Stack.Screen
+          name="New Medication"
+          component={NewMedicationScreen}
           options={{ title: '' }}
         />
         <Stack.Screen

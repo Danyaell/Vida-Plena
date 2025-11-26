@@ -8,12 +8,13 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import CallButton from "../components/CallButton";
 import { useMedications } from "../context/MedicationsContext";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 type Medication = {
   id: string;
   name: string;
   dose: string;
-  frequencyhours: number;
+  frequencyHours: number;
   schedules?: string[];
   durationDays?: number;
   notes?: string;
@@ -24,7 +25,7 @@ const DATA: Medication[] = [
     id: "1",
     name: "Metformina",
     dose: "850 mg",
-    frequencyhours: 12,
+    frequencyHours: 12,
     schedules: ["08:00", "20:00"],
     durationDays: 30,
     notes: "Tomar con alimentos.",
@@ -33,14 +34,18 @@ const DATA: Medication[] = [
     id: "2",
     name: "Losartán",
     dose: "50 mg",
-    frequencyhours: 24,
+    frequencyHours: 24,
     schedules: ["08:00", "20:00"],
     durationDays: 30,
     notes: "Tomar antes de dormir.",
   },
 ];
 
-export default function MedicationsScreen() {
+export default function MedicationsScreen({
+  navigation,
+}: {
+  navigation: NativeStackNavigationProp<any>;
+}) {
   const { medications, loading } = useMedications();
 
   if (loading) {
@@ -64,7 +69,7 @@ export default function MedicationsScreen() {
             <View style={styles.textContainer}>
               <Text style={styles.name}>{item.name}</Text>
               <Text style={styles.text}>{item.dose}</Text>
-              <Text style={styles.text}>Cada {item.frequencyhours} hrs</Text>
+              <Text style={styles.text}>Cada {item.frequencyHours} hrs</Text>
             </View>
             <Ionicons
               name="chevron-forward-outline"
@@ -80,7 +85,7 @@ export default function MedicationsScreen() {
           <Text style={styles.subtext}>Empieza creando un medicamento.</Text>
         </View>
       )}
-      <TouchableOpacity style={styles.createButton} onPress={() => {}}>
+      <TouchableOpacity style={styles.createButton} onPress={() => navigation.navigate("New Medication")}>
         <Text style={styles.createButtonText}>NUEVO MEDICAMENTO</Text>
       </TouchableOpacity>
       <CallButton />
