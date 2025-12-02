@@ -1,16 +1,69 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import CallButton from "../components/CallButton";
+import { useEffect, useState } from "react";
 
 export default function HomeScreen({
   navigation,
 }: {
   navigation: NativeStackNavigationProp<any>;
 }) {
+  const WEEK_DAY = [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+  ];
+
+  const MONTHS = [
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
+  ];
+
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  function formatHour(date: Date) {
+    let h = date.getHours();
+    let m = date.getMinutes();
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12;
+    const minStr = `${h}:${m < 10 ? "0" + m : m}`;
+    return `${minStr} ${ampm}`;
+  }
+
+  function formatDate(date: Date) {
+    const weekDay = WEEK_DAY[date.getDay()];
+    const dayNumber = date.getDate();
+    const month = MONTHS[date.getMonth()];
+
+    return `${weekDay} ${dayNumber} de ${month}`;
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>6:40 PM</Text>
-      <Text style={styles.subtitle}>Martes 25 de noviembre</Text>
+      <Text style={styles.title}>{formatHour(now)}</Text>
+      <Text style={styles.subtitle}>{formatDate(now)}</Text>
 
       <TouchableOpacity style={styles.reminderContainer} onPress={() => {}}>
         <View style={styles.reminderTextContainer}>

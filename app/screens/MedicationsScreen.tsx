@@ -65,11 +65,11 @@ export default function MedicationsScreen({
         data={medications}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.card}>
+          <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("Medication Detail", { medication: item })}>
             <View style={styles.textContainer}>
               <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.text}>{item.dose}</Text>
-              <Text style={styles.text}>Cada {item.frequencyHours} hrs</Text>
+              <Text style={styles.text}>{item.dose} {item.quantity}</Text>
+              <Text style={styles.text}>Cada {item.frequencyHours} hora(s)</Text>
             </View>
             <Ionicons
               name="chevron-forward-outline"
@@ -95,8 +95,11 @@ export default function MedicationsScreen({
 
 const styles = StyleSheet.create({
   container: {
+    height: "100%",
+    position: "absolute",
     flex: 1,
     padding: 16,
+    paddingBottom: 50,
     backgroundColor: "#FFFFFF",
   },
   title: {
@@ -148,7 +151,7 @@ const styles = StyleSheet.create({
   },
   createButton: {
     position: "absolute",
-    bottom: 40,
+    bottom: 50,
     left: 24,
     width: 240,
     height: 80,

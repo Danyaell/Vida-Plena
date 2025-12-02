@@ -7,17 +7,18 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Modal,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useMedications } from "../context/MedicationsContext";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-export default function NewMedicationScreen({ navigation }: {
+export default function NewMedicationScreen({
+  navigation,
+}: {
   navigation: NativeStackNavigationProp<any>;
 }) {
-  // THIS PAGE STILL IS A WORK IN PROGRESS
-  // AND MAY NOT FUNCTION AS EXPECTED WITHOUT ADDITIONAL ADJUSTMENTS.
-  // PLEASE TEST THOROUGHLY BEFORE USING.
   const { addMedication } = useMedications();
 
   const [name, setName] = useState("");
@@ -26,10 +27,15 @@ export default function NewMedicationScreen({ navigation }: {
   const [schedulesText, setSchedulesText] = useState("");
   const [durationDays, setDurationDays] = useState("");
   const [notes, setNotes] = useState("");
+  const [open, setOpen] = useState(false);
+  const [quantity, setQuantity] = useState("mg");
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert("Falta información", "Por favor, escribe el nombre del medicamento.");
+      Alert.alert(
+        "Falta información",
+        "Por favor, escribe el nombre del medicamento."
+      );
       return;
     }
 
@@ -42,6 +48,7 @@ export default function NewMedicationScreen({ navigation }: {
       await addMedication({
         name: name.trim(),
         dose: dose.trim(),
+        quantity: quantity.trim(),
         frequencyHours: parseInt(frecuencyHours.trim()) || 0,
         schedules: schedules.length > 0 ? schedules : undefined,
         durationDays: durationDays ? Number(durationDays) : undefined,
@@ -63,7 +70,6 @@ export default function NewMedicationScreen({ navigation }: {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Nuevo medicamento</Text>
 
-      {/* Nombre */}
       <Text style={styles.label}>Nombre del medicamento</Text>
       <TextInput
         style={styles.input}
@@ -72,35 +78,104 @@ export default function NewMedicationScreen({ navigation }: {
         onChangeText={setName}
       />
 
-      {/* Dosis */}
       <Text style={styles.label}>Dosis</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Ej. 850 mg"
-        value={dose}
-        onChangeText={setDose}
-      />
+      <View style={styles.row}>
+        <TextInput
+          style={styles.smallInput}
+          placeholder="Ej. 850"
+          value={dose}
+          onChangeText={setDose}
+        />
+        <View>
+          <TouchableOpacity
+            style={styles.smallButton}
+            onPress={() => setOpen(true)}
+          >
+            <Text style={styles.buttonText}>{quantity}</Text>
+            <Ionicons name="chevron-down" size={20} color="#000" />
+          </TouchableOpacity>
 
-      {/* Frecuencia */}
+          <Modal visible={open} transparent animationType="fade">
+            <Pressable style={styles.overlay} onPress={() => setOpen(false)} />
+
+            <View style={styles.menu}>
+              <Pressable
+                style={styles.option}
+                onPress={() => {
+                  setQuantity("mg");
+                  setOpen(false);
+                }}
+              >
+                <Text style={styles.optionText}>mg</Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.option}
+                onPress={() => {
+                  setQuantity("ml");
+                  setOpen(false);
+                }}
+              >
+                <Text style={styles.optionText}>ml</Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.option}
+                onPress={() => {
+                  setQuantity("tabletas");
+                  setOpen(false);
+                }}
+              >
+                <Text style={styles.optionText}>Tabletas</Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.option}
+                onPress={() => {
+                  setQuantity("píldoras");
+                  setOpen(false);
+                }}
+              >
+                <Text style={styles.optionText}>Píldoras</Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.option}
+                onPress={() => {
+                  setQuantity("gotas");
+                  setOpen(false);
+                }}
+              >
+                <Text style={styles.optionText}>Gotas</Text>
+              </Pressable>
+            </View>
+          </Modal>
+        </View>
+      </View>
+
       <Text style={styles.label}>Frecuencia</Text>
-      <TextInput
-        style={styles.input}
-        placeholder='Ej. 2 veces al día o "Cada 8 horas"'
-        value={frecuencyHours}
-        onChangeText={setFrecuencyHours}
-      />
+      <View style={[styles.row, styles.alignCenter]}>
+        <Text style={styles.formText}>Cada </Text>
+        <TextInput
+          style={styles.smallInput}
+          placeholder="Ej. 24"
+          value={frecuencyHours}
+          onChangeText={setFrecuencyHours}
+        />
+        <Text style={styles.formText}> hora(s)</Text>
+      </View>
 
-      {/* Horarios */}
       <Text style={styles.label}>Horarios (opcional)</Text>
       <TextInput
         style={styles.input}
-        placeholder='Ej. 08:00, 20:00'
+        placeholder="Ej. 08:00, 20:00"
         value={schedulesText}
         onChangeText={setSchedulesText}
       />
 
-      {/* Duración */}
-      <Text style={styles.label}>Duración del tratamiento (días, opcional)</Text>
+      <Text style={styles.label}>
+        Duración del tratamiento (días, opcional)
+      </Text>
       <TextInput
         style={styles.input}
         placeholder="Ej. 30"
@@ -109,7 +184,6 @@ export default function NewMedicationScreen({ navigation }: {
         onChangeText={setDurationDays}
       />
 
-      {/* Notas */}
       <Text style={styles.label}>Notas (opcional)</Text>
       <TextInput
         style={[styles.input, styles.inputMultiline]}
@@ -120,10 +194,9 @@ export default function NewMedicationScreen({ navigation }: {
         numberOfLines={3}
       />
 
-      {/* Botón guardar */}
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Ionicons name="save-outline" size={24} color="#FFFFFF" />
-        <Text style={styles.saveButtonText}>Guardar medicamento</Text>
+        <Text style={styles.saveButtonText}>GUARDAR</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -131,34 +204,90 @@ export default function NewMedicationScreen({ navigation }: {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 0,
     padding: 20,
-    paddingBottom: 40,
+    paddingTop: 0,
+    paddingBottom: 50,
     backgroundColor: "#FFFFFF",
   },
   title: {
-    fontSize: 30,
+    fontSize: 50,
     fontWeight: "bold",
-    marginBottom: 20,
-    color: "#0c56aaff",
+    marginBottom: 15,
     textAlign: "left",
+    color: "#0c56aaff",
   },
   label: {
-    fontSize: 18,
+    fontSize: 24,
     marginBottom: 6,
-    color: "#333333",
+    color: "#0c56aaff",
+    paddingTop: 8,
+  },
+  formText: {
+    fontSize: 24,
+    marginBottom: 14,
   },
   input: {
+    width: "auto",
     borderWidth: 1,
     borderColor: "#CCCCCC",
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    fontSize: 18,
+    fontSize: 24,
     marginBottom: 14,
     backgroundColor: "#F9F9F9",
   },
   inputMultiline: {
     textAlignVertical: "top",
+  },
+  smallInput: {
+    width: "45%",
+    borderWidth: 1,
+    borderColor: "#CCCCCC",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 24,
+    marginBottom: 14,
+    backgroundColor: "#F9F9F9",
+  },
+  smallButton: {
+    width: "auto",
+    borderWidth: 1,
+    borderColor: "#CCCCCC",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#F9F9F9",
+  },
+  buttonText: {
+    fontSize: 24,
+  },
+
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
+
+  menu: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#FFF",
+    padding: 24,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+  option: {
+    paddingVertical: 14,
+  },
+  optionText: {
+    fontSize: 25,
   },
   saveButton: {
     flexDirection: "row",
@@ -174,5 +303,13 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "bold",
     marginLeft: 8,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  alignCenter: {
+    alignItems: "center",
   },
 });
