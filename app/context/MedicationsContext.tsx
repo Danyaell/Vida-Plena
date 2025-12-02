@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-type Medication = {
+export type Medication = {
   id: string;
   name: string;
   dose: string;
+  quantity: string;
   frequencyHours: number;
   schedules?: string[];
   durationDays?: number;

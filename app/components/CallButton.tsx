@@ -64,7 +64,7 @@ export default function CallButton() {
 const styles = StyleSheet.create({
   button: {
     position: "absolute",
-    bottom: 40,
+    bottom: 50,
     right: 24,
     width: 80,
     height: 80,

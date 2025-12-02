@@ -138,6 +138,11 @@ export default function AppointmentsScreen() {
           <TouchableOpacity style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>{item.title}</Text>
+              <Ionicons
+                  name="chevron-forward-outline"
+                  size={32}
+                  style={styles.arrowIcon}
+                />
             </View>
 
             <View style={styles.details}>
@@ -153,19 +158,19 @@ export default function AppointmentsScreen() {
                 </View>
               </View>
 
-              <View style={styles.row}>
+              {/* <View style={styles.row}>
                 <Ionicons name="location-outline" size={22} color="#000000" />
                 <Text style={styles.place}>{item.place}</Text>
-              </View>
+              </View> */}
 
-              {item.notes ? (
+              {/* {item.notes ? (
                 <Text style={styles.notes}>Nota: {item.notes}</Text>
-              ) : null}
+              ) : null} */}
             </View>
           </TouchableOpacity>
         )}
       />
-	  <CallButton />
+      <CallButton />
     </View>
   );
 }
@@ -174,6 +179,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    paddingBottom: 50,
     backgroundColor: "#FFFFFF",
   },
   title: {
@@ -187,8 +193,8 @@ const styles = StyleSheet.create({
     fontSize: 30,
     marginTop: 12,
     marginBottom: 6,
-	borderBottomColor: "#dbdbdbff",
-	borderBottomWidth: 1,
+    borderBottomColor: "#dbdbdbff",
+    borderBottomWidth: 1,
     color: "#8a8a8aff",
   },
   listContent: {
@@ -202,7 +208,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cardHeader: {
-    flexDirection: "column",
+    flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: 8,
@@ -220,14 +226,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 12,
-	backgroundColor: "#0c56aaff",
-	padding: 10,
-	paddingHorizontal: 20,
-	borderRadius: 45,
+    backgroundColor: "#0c56aaff",
+    padding: 10,
+    paddingHorizontal: 20,
+    borderRadius: 45,
   },
   timeIcon: {
     color: "#ffffffff",
-	paddingRight: 8,
+    paddingRight: 5,
+  },
+  arrowIcon: {
+    color: "#000",
+    fontSize: 40,
+    paddingTop: 8,
   },
   dateTexts: {
     marginLeft: 8,
