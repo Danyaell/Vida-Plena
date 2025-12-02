@@ -3,7 +3,9 @@ import HomeScreen from '../screens/HomeScreen';
 import MedicationsScreen from '../screens/MedicationsScreen';
 import AppointmentsScreen from '../screens/AppointmentsScreen';
 import NewMedicationScreen from '../screens/NewMedicationScreen';
-import MedicationDetail from '../screens/MedicationDetail';
+import MedicationDetail from '../screens/MedicationDetailScreen';
+import NewAppointmentScreen from '../screens/NewAppointmentScreen';
+import AppointmentDetailScreen from '../screens/AppointmentDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,6 +35,16 @@ export default function AppNavigator() {
         <Stack.Screen
           name="Appointments"
           component={AppointmentsScreen}
+          options={{ title: '' }}
+        />
+        <Stack.Screen
+          name="New Appointment"
+          component={NewAppointmentScreen}
+          options={{ title: '' }}
+        />
+        <Stack.Screen
+          name="Appointment Detail"
+          component={AppointmentDetailScreen}
           options={{ title: '' }}
         />
       </Stack.Navigator>

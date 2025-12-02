@@ -2,77 +2,22 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   TouchableOpacity,
   SectionList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import CallButton from "../components/CallButton";
-
-type AppointmentDate = {
-  day: number;
-  month: number;
-  year: number;
-  hour: string;
-};
-
-type Appointment = {
-  id: string;
-  date: AppointmentDate;
-  doctor: string;
-  title: string;
-  place: string;
-  notes?: string;
-  status: "pendiente" | "completada" | "cancelada";
-};
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import {
+  Appointment,
+  AppointmentDate,
+  useAppointments,
+} from "../context/AppointmentsContext";
 
 type AppointmentSection = {
   title: string;
   data: Appointment[];
 };
-
-const CITAS_MOCK: Appointment[] = [
-  {
-    id: "1",
-    date: {
-      day: 24,
-      month: 11,
-      year: 2025,
-      hour: "10:30 a.m.",
-    },
-    doctor: "Dr. Juan Pérez",
-    title: "Consulta general",
-    place: "Clínica Familiar #12",
-    notes: "Llevar lista de medicamentos.",
-    status: "pendiente",
-  },
-  {
-    id: "2",
-    date: {
-      day: 26,
-      month: 11,
-      year: 2025,
-      hour: "4:00 p.m.",
-    },
-    doctor: "Dra. Ana López",
-    title: "Cardiología",
-    place: "Hospital Central",
-    status: "pendiente",
-  },
-  {
-    id: "3",
-    date: {
-      day: 20,
-      month: 12,
-      year: 2025,
-      hour: "9:00 a.m.",
-    },
-    doctor: "Dr. Ramírez",
-    title: "Análisis de laboratorio",
-    place: "Laboratorio SaludPlus",
-    status: "completada",
-  },
-];
 
 const MONTHS = [
   "Enero",
@@ -99,77 +44,108 @@ function getGroupMonth(fecha: AppointmentDate) {
   return `${nombreMes} ${fecha.year}`;
 }
 
-const sections: AppointmentSection[] = Object.values(
-  CITAS_MOCK.reduce((acc, cita) => {
-    const key = getGroupMonth(cita.date);
-    if (!acc[key]) {
-      acc[key] = { title: key, data: [] };
-    }
-    acc[key].data.push(cita);
-    return acc;
-  }, {} as Record<string, AppointmentSection>)
-);
-
 const getStatus = (status: Appointment["status"]) => {
-  if (status === "pendiente") return "Pendiente";
-  if (status === "completada") return "Completada";
+  if (status === "pending") return "Pendiente";
+  if (status === "completed") return "Completada";
   return "Cancelada";
 };
 
 const getStatusStyle = (status: Appointment["status"]) => {
-  if (status === "pendiente") return styles.statusPending;
-  if (status === "completada") return styles.statusCompleted;
+  if (status === "pending") return styles.statusPending;
+  if (status === "completed") return styles.statusCompleted;
   return styles.statusCancelled;
 };
 
-export default function AppointmentsScreen() {
+export default function AppointmentsScreen({
+  navigation,
+}: {
+  navigation: NativeStackNavigationProp<any>;
+}) {
+  const { appointments, loading } = useAppointments();
+
+  const sections: AppointmentSection[] = Object.values(
+    appointments.reduce((acc, appointment) => {
+      const key = getGroupMonth(appointment.date);
+      if (!acc[key]) {
+        acc[key] = { title: key, data: [] };
+      }
+      acc[key].data.push(appointment);
+      return acc;
+    }, {} as Record<string, AppointmentSection>)
+  );
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Cargando citas...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Mis citas</Text>
 
-      <SectionList
-        sections={sections}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        renderSectionHeader={({ section }) => (
-          <Text style={styles.sectionHeader}>{section.title}</Text>
-        )}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              <Ionicons
+      {appointments.length !== 0 ? (
+        <SectionList
+          sections={sections}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          renderSectionHeader={({ section }) => (
+            <Text style={styles.sectionHeader}>{section.title}</Text>
+          )}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() =>
+                navigation.navigate("Appointment Detail", { appointment: item })
+              }
+            >
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardTitle}>{item.title}</Text>
+                <Ionicons
                   name="chevron-forward-outline"
                   size={32}
                   style={styles.arrowIcon}
                 />
-            </View>
-
-            <View style={styles.details}>
-              <View style={styles.dateRow}>
-                <Ionicons
-                  name="time-outline"
-                  size={32}
-                  style={styles.timeIcon}
-                />
-                <View style={styles.dateTexts}>
-                  <Text style={styles.date}>{longDateFormat(item.date)}</Text>
-                  <Text style={styles.hour}>{item.date.hour}</Text>
-                </View>
               </View>
 
-              {/* <View style={styles.row}>
+              <View style={styles.details}>
+                <View style={styles.dateRow}>
+                  <Ionicons
+                    name="time-outline"
+                    size={32}
+                    style={styles.timeIcon}
+                  />
+                  <View style={styles.dateTexts}>
+                    <Text style={styles.date}>{longDateFormat(item.date)}</Text>
+                    <Text style={styles.hour}>{item.date.hour}</Text>
+                  </View>
+                </View>
+
+                {/* <View style={styles.row}>
                 <Ionicons name="location-outline" size={22} color="#000000" />
                 <Text style={styles.place}>{item.place}</Text>
               </View> */}
 
-              {/* {item.notes ? (
+                {/* {item.notes ? (
                 <Text style={styles.notes}>Nota: {item.notes}</Text>
               ) : null} */}
-            </View>
-          </TouchableOpacity>
-        )}
-      />
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+      ) : (
+        <View style={styles.subtextContainer}>
+          <Text style={styles.subtext}>No hay citas registradas.</Text>
+          <Text style={styles.subtext}>Empieza creando una cita.</Text>
+        </View>
+      )}
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => navigation.navigate("New Appointment")}
+      >
+        <Text style={styles.createButtonText}>NUEVA CITA</Text>
+      </TouchableOpacity>
       <CallButton />
     </View>
   );
@@ -179,7 +155,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    paddingBottom: 50,
+    paddingBottom: 110,
     backgroundColor: "#FFFFFF",
   },
   title: {
@@ -287,5 +263,43 @@ const styles = StyleSheet.create({
   },
   statusCancelled: {
     backgroundColor: "#C0392B",
+  },
+  subtextContainer: {
+    paddingVertical: 50,
+    paddingHorizontal: 10,
+    marginTop: 50,
+    marginBottom: 20,
+    alignItems: "center",
+    backgroundColor: "#f0f0f0ff",
+    borderRadius: 30,
+  },
+  subtext: {
+    fontSize: 28,
+    marginBottom: 20,
+    fontWeight: "500",
+    color: "#646464ff",
+    textAlign: "center",
+  },
+  createButton: {
+    position: "absolute",
+    bottom: 50,
+    left: 24,
+    width: 240,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#0c56aaff",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  createButtonText: {
+    fontSize: 20,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });

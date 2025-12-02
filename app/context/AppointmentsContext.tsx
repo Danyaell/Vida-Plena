@@ -1,8 +1,7 @@
-// src/context/AppointmentsContext.tsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-type AppointmentDate = {
+export type AppointmentDate = {
   day: number;
   month: number;
   year: number;
@@ -11,12 +10,12 @@ type AppointmentDate = {
 
 export type Appointment = {
   id: string;
-  date: AppointmentDate;
-  doctor: string;
   title: string;
-  place: string;
+  date: AppointmentDate;
+  place?: string;
+  doctor?: string;
   notes?: string;
-  status: "pendiente" | "completada" | "cancelada";
+  status: "pending" | "completed" | "canceled";
 };
 
 type AppointmentsContextType = {

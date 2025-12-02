@@ -1,94 +1,105 @@
-import React, { useState } from "react";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
   Alert,
   Modal,
   Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { Medication, useMedications } from "../context/MedicationsContext";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Appointment, useAppointments } from "../context/AppointmentsContext";
 import { RouteProp, useRoute } from "@react-navigation/native";
+import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 
 type RouteParams = {
-  MedicationDetail: {
-    medication: Medication;
+  AppointmentDetail: {
+    appointment: Appointment;
   };
 };
 
-type MedicationDetailRouteProp = RouteProp<RouteParams, "MedicationDetail">;
+type AppointmentDetailRouteProp = RouteProp<RouteParams, "AppointmentDetail">;
 
-export default function MedicationDetail({
+const MONTHS = [
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
+];
+
+export default function AppointmentDetailScreen({
   navigation,
 }: {
   navigation: NativeStackNavigationProp<any>;
 }) {
-  const route = useRoute<MedicationDetailRouteProp>();
-  const { medication } = route.params;
+  const route = useRoute<AppointmentDetailRouteProp>();
+  const { appointment } = route.params;
   const [isEditing, setIsEditing] = useState(false);
 
-  const [name, setName] = useState(medication.name);
-  const [dose, setDose] = useState(medication.dose);
-  const [frecuencyHours, setFrecuencyHours] = useState(
-    medication.frequencyHours.toString()
-  );
-  const [schedulesText, setSchedulesText] = useState(
-    medication.schedules?.join(", ") || ""
-  );
-  const [durationDays, setDurationDays] = useState(
-    medication.durationDays ? medication.durationDays.toString() : ""
-  );
-  const [notes, setNotes] = useState(medication.notes || "");
-  const [quantity, setQuantity] = useState(medication.quantity);
+  const { updateAppointment, removeAppointment } = useAppointments();
+
+  const [title, setTitle] = useState(appointment.title);
+  const [day, setDay] = useState(appointment.date.day.toString());
+  const [month, setMonth] = useState(appointment.date.month);
+  const [year, setYear] = useState(appointment.date.year.toString());
+  const [hour, setHour] = useState(appointment.date.hour);
+  const [place, setPlace] = useState(appointment.place || "");
+  const [doctor, setDoctor] = useState(appointment.doctor || "");
+  const [notes, setNotes] = useState(appointment.notes || "");
+
   const [open, setOpen] = useState(false);
 
-  const { updateMedication, removeMedication } = useMedications();
-
   const handleSave = async () => {
-    if (!name.trim()) {
+    if (!title.trim()) {
       Alert.alert(
         "Falta información",
-        "Por favor, escribe el nombre del medicamento."
+        "Por favor, escribe el nombre de la cita."
       );
       return;
     }
-
-    const schedules = schedulesText
-      .split(",")
-      .map((h) => h.trim())
-      .filter((h) => h.length > 0);
+    const date = {
+      day: parseInt(day) || 0,
+      month: month,
+      year: parseInt(year) || 0,
+      hour: hour.trim(),
+    };
 
     try {
-      await updateMedication(medication.id, {
-        name: name.trim(),
-        dose: dose.trim(),
-        quantity: quantity.trim(),
-        frequencyHours: parseInt(frecuencyHours.trim()) || 0,
-        schedules: schedules.length > 0 ? schedules : undefined,
-        durationDays: durationDays ? Number(durationDays) : undefined,
+      await updateAppointment(appointment.id, {
+        title: title.trim(),
+        date: date,
+        place: place.trim() || undefined,
+        doctor: doctor.trim() || undefined,
         notes: notes.trim() || undefined,
+        status: "pending",
       });
 
-      Alert.alert("Guardado", "El medicamento se guardó correctamente.", [
+      Alert.alert("Guardado", "La cita se guardó correctamente.", [
         {
           text: "OK",
           onPress: () => navigation.goBack(),
         },
       ]);
     } catch (e) {
-      Alert.alert("Error", "Ocurrió un problema al guardar el medicamento.");
+      Alert.alert("Error", "Ocurrió un problema al guardar la cita.");
     }
   };
 
   const handleDelete = () => {
     Alert.alert(
       "Confirmar eliminación",
-      "¿Estás seguro de que deseas eliminar este medicamento?",
+      "¿Estás seguro de que deseas eliminar esta cita?",
       [
         {
           text: "Cancelar",
@@ -98,7 +109,7 @@ export default function MedicationDetail({
           text: "Eliminar",
           style: "destructive",
           onPress: async () => {
-            removeMedication(medication.id);
+            removeAppointment(appointment.id);
             navigation.goBack();
           },
         },
@@ -108,23 +119,34 @@ export default function MedicationDetail({
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>{medication.name}</Text>
+      {isEditing ? (
+        <TextInput
+          style={[styles.titleInput, styles.inputMultiline]}
+          placeholder="Ej. Consulta"
+          value={title}
+          onChangeText={setTitle}
+          multiline
+          numberOfLines={3}
+        />
+      ) : (
+        <Text style={styles.title}>{appointment.title}</Text>
+      )}
 
-      <Text style={styles.label}>Dosis</Text>
+      <Text style={styles.label}>Fecha:</Text>
       {isEditing ? (
         <View style={styles.row}>
           <TextInput
             style={styles.smallInput}
-            placeholder="Ej. 850"
-            value={dose}
-            onChangeText={setDose}
+            placeholder="DD"
+            value={day}
+            onChangeText={setDay}
           />
           <View>
             <TouchableOpacity
               style={styles.smallButton}
               onPress={() => setOpen(true)}
             >
-              <Text style={styles.buttonText}>{quantity}</Text>
+              <Text style={styles.buttonText}>{MONTHS[month - 1]}</Text>
               <Ionicons name="chevron-down" size={20} color="#000" />
             </TouchableOpacity>
 
@@ -138,124 +160,196 @@ export default function MedicationDetail({
                 <Pressable
                   style={styles.option}
                   onPress={() => {
-                    setQuantity("mg");
+                    setMonth(1);
                     setOpen(false);
                   }}
                 >
-                  <Text style={styles.optionText}>mg</Text>
+                  <Text style={styles.optionText}>Enero</Text>
                 </Pressable>
 
                 <Pressable
                   style={styles.option}
                   onPress={() => {
-                    setQuantity("ml");
+                    setMonth(2);
                     setOpen(false);
                   }}
                 >
-                  <Text style={styles.optionText}>ml</Text>
+                  <Text style={styles.optionText}>Febrero</Text>
                 </Pressable>
 
                 <Pressable
                   style={styles.option}
                   onPress={() => {
-                    setQuantity("tabletas");
+                    setMonth(3);
                     setOpen(false);
                   }}
                 >
-                  <Text style={styles.optionText}>Tabletas</Text>
+                  <Text style={styles.optionText}>Marzo</Text>
                 </Pressable>
 
                 <Pressable
                   style={styles.option}
                   onPress={() => {
-                    setQuantity("píldoras");
+                    setMonth(4);
                     setOpen(false);
                   }}
                 >
-                  <Text style={styles.optionText}>Píldoras</Text>
+                  <Text style={styles.optionText}>Abril</Text>
                 </Pressable>
 
                 <Pressable
                   style={styles.option}
                   onPress={() => {
-                    setQuantity("gotas");
+                    setMonth(5);
                     setOpen(false);
                   }}
                 >
-                  <Text style={styles.optionText}>Gotas</Text>
+                  <Text style={styles.optionText}>Mayo</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.option}
+                  onPress={() => {
+                    setMonth(6);
+                    setOpen(false);
+                  }}
+                >
+                  <Text style={styles.optionText}>Junio</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.option}
+                  onPress={() => {
+                    setMonth(7);
+                    setOpen(false);
+                  }}
+                >
+                  <Text style={styles.optionText}>Julio</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.option}
+                  onPress={() => {
+                    setMonth(8);
+                    setOpen(false);
+                  }}
+                >
+                  <Text style={styles.optionText}>Agosto</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.option}
+                  onPress={() => {
+                    setMonth(9);
+                    setOpen(false);
+                  }}
+                >
+                  <Text style={styles.optionText}>Septiembre</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.option}
+                  onPress={() => {
+                    setMonth(10);
+                    setOpen(false);
+                  }}
+                >
+                  <Text style={styles.optionText}>Octubre</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.option}
+                  onPress={() => {
+                    setMonth(11);
+                    setOpen(false);
+                  }}
+                >
+                  <Text style={styles.optionText}>Noviembre</Text>
+                </Pressable>
+
+                <Pressable
+                  style={styles.option}
+                  onPress={() => {
+                    setMonth(12);
+                    setOpen(false);
+                  }}
+                >
+                  <Text style={styles.optionText}>Diciembre</Text>
                 </Pressable>
               </View>
             </Modal>
           </View>
+          <TextInput
+            style={styles.smallInput}
+            placeholder="AAAA"
+            value={year}
+            onChangeText={setYear}
+          />
         </View>
       ) : (
         <Text style={styles.text}>
-          {medication.dose} {medication.quantity}
+          {appointment.date.day} de {appointment.date.month} de{" "}
+          {appointment.date.year}
         </Text>
       )}
 
-      <Text style={styles.label}>Frecuencia</Text>
+      <Text style={styles.label}>Hora:</Text>
       {isEditing ? (
-        <View style={[styles.row, styles.alignCenter]}>
-          <Text style={styles.formText}>Cada </Text>
-          <TextInput
-            style={styles.smallInput}
-            placeholder="Ej. 24"
-            value={frecuencyHours}
-            onChangeText={setFrecuencyHours}
-          />
-          <Text style={styles.formText}> hora(s)</Text>
-        </View>
+        <TextInput
+          style={[styles.input, styles.inputMultiline]}
+          placeholder="Ej. 04:00 PM"
+          value={hour}
+          onChangeText={setHour}
+        />
       ) : (
-        <Text style={styles.formText}>
-          Cada {medication.frequencyHours} hora(s)
-        </Text>
+        <Text style={styles.text}>{appointment.date.hour}</Text>
       )}
 
       {isEditing ? (
         <View>
-          <Text style={styles.label}>Horarios (opcional)</Text>
+          <Text style={styles.label}>Lugar (opcional):</Text>
           <TextInput
-            style={styles.input}
-            placeholder="Ej. 08:00, 20:00"
-            value={schedulesText}
-            onChangeText={setSchedulesText}
+            style={[styles.input, styles.inputMultiline]}
+            placeholder="Ej. Hospital general"
+            value={place}
+            onChangeText={setPlace}
+            multiline
+            numberOfLines={3}
           />
         </View>
       ) : (
-        medication.schedules && (
+        appointment.place && (
           <View>
-            <Text style={styles.label}>Horarios</Text>
-            <Text style={styles.text}>{medication.schedules}</Text>
+            <Text style={styles.label}>Lugar:</Text>
+            <Text style={styles.text}>{appointment.place}</Text>
           </View>
         )
       )}
 
       {isEditing ? (
         <View>
-          <Text style={styles.label}>
-            Duración del tratamiento (días, opcional)
-          </Text>
+          <Text style={styles.label}>Médico (opcional):</Text>
           <TextInput
-            style={styles.input}
-            placeholder="Ej. 30"
-            keyboardType="number-pad"
-            value={durationDays}
-            onChangeText={setDurationDays}
+            style={[styles.input, styles.inputMultiline]}
+            placeholder="Ej. Dr. Juan Pérez"
+            value={doctor}
+            onChangeText={setDoctor}
+            multiline
+            numberOfLines={3}
           />
         </View>
       ) : (
-        medication.durationDays && (
+        appointment.doctor && (
           <View>
-            <Text style={styles.label}>Duración del tratamiento</Text>
-            <Text style={styles.text}>{medication.durationDays} días</Text>
+            <Text style={styles.label}>Médico:</Text>
+            <Text style={styles.text}>{appointment.doctor}</Text>
           </View>
         )
       )}
 
       {isEditing ? (
         <View>
-          <Text style={styles.label}>Notas (opcional)</Text>
+          <Text style={styles.label}>Notas (opcional):</Text>
           <TextInput
             style={[styles.input, styles.inputMultiline]}
             placeholder="Ej. Tomar después de comer."
@@ -266,10 +360,10 @@ export default function MedicationDetail({
           />
         </View>
       ) : (
-        medication.notes && (
+        appointment.notes && (
           <View>
-            <Text style={styles.label}>Notas</Text>
-            <Text style={styles.text}>{medication.notes}</Text>
+            <Text style={styles.label}>Notas:</Text>
+            <Text style={styles.text}>{appointment.notes}</Text>
           </View>
         )
       )}
@@ -343,6 +437,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginBottom: 14,
   },
+  titleInput: {
+    width: "100%",
+    fontSize: 50,
+    fontWeight: "bold",
+    marginBottom: 15,
+    textAlign: "left",
+    color: "#0c56aaff",
+  },
   input: {
     width: "auto",
     borderWidth: 1,
@@ -358,7 +460,7 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   smallInput: {
-    width: "45%",
+    width: "25%",
     borderWidth: 1,
     borderColor: "#CCCCCC",
     borderRadius: 12,
@@ -451,10 +553,10 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   deleteButtonText: {
-	fontSize: 20,
-	color: "#aa0c0cff",
-	fontWeight: "bold",
-	marginLeft: 8,
+    fontSize: 20,
+    color: "#aa0c0cff",
+    fontWeight: "bold",
+    marginLeft: 8,
   },
   row: {
     flexDirection: "row",
